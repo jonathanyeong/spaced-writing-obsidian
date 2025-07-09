@@ -1,23 +1,22 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin } from 'obsidian';
+import type { PluginSettings } from './settings';
+import { SampleSettingTab } from './settings';
 
-// Remember to rename these classes and interfaces!
+export const DEFAULT_SETTINGS: PluginSettings = {
+  writingInboxFolder: 'writing-inbox',
+  dailyLimit: '10',
+  reviewTime: '09:00',
+  showStats: true
+};
 
-interface MyPluginSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
-
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class WritingInboxPlugin extends Plugin {
+	settings: PluginSettings;
 
 	async onload() {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('dice', 'Writing Inbox', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new Notice('This is a notice!');
 		});
@@ -107,28 +106,4 @@ class SampleModal extends Modal {
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
-}
