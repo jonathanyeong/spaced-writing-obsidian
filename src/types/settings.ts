@@ -9,7 +9,6 @@ export interface WritingEntry {
   easeFactor: number;
   repetitions: number;
   quality: number;
-  responses: Response[];
   status: 'active' | 'archived';
 }
 
