@@ -1,5 +1,5 @@
 import { TFile, TFolder, Vault } from 'obsidian';
-import * as matter from 'gray-matter';
+import matter from 'gray-matter';
 import type { WritingEntry } from '../types/settings';
 import { getInitialSM2Values } from './sm2';
 
@@ -126,14 +126,14 @@ export class FileManager {
     // First, update the status in frontmatter
     const content = await this.vault.read(file);
     const { data, content: body } = matter(content);
-    
+
     const frontmatter = data as EntryFrontmatter;
     frontmatter.status = 'archived';
     frontmatter.lastModified = new Date().toISOString();
-    
+
     const updatedContent = matter.stringify(body, frontmatter);
     await this.vault.modify(file, updatedContent);
-    
+
     // Then move to archive folder
     const newPath = file.path.replace('/entries/', '/archive/');
     await this.vault.rename(file, newPath);
@@ -147,20 +147,18 @@ export class FileManager {
   async getEntryFiles(folder: string): Promise<TFile[]> {
     const entriesPath = `${folder}/entries`;
     const entriesFolder = this.vault.getAbstractFileByPath(entriesPath);
-    
+
     if (!entriesFolder || !(entriesFolder instanceof TFolder)) {
       return [];
     }
-    
+
     const files: TFile[] = [];
     for (const child of entriesFolder.children) {
       if (child instanceof TFile && child.extension === 'md') {
         files.push(child);
       }
     }
-    
+
     return files;
   }
-
-
 }
