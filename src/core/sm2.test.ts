@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateSM2, calculateNextReviewDate, qualityToNumber } from './sm2';
+import { calculateSM2 } from './sm2';
 
 describe('SM-2 Algorithm', () => {
   describe('calculateSM2', () => {
@@ -46,34 +46,9 @@ describe('SM-2 Algorithm', () => {
     it('should clamp quality values between 0 and 5', () => {
       const resultNegative = calculateSM2(-1, 0, 2.5, 1);
       const resultTooHigh = calculateSM2(10, 0, 2.5, 1);
-      
       // Both should behave as if quality was clamped to valid range
       expect(resultNegative.interval).toBe(1);
       expect(resultTooHigh.interval).toBe(1);
-    });
-  });
-
-  describe('calculateNextReviewDate', () => {
-    it('should calculate next review date correctly', () => {
-      const startDate = new Date('2025-01-09');
-      const nextDate = calculateNextReviewDate(startDate, 6);
-      
-      expect(nextDate.toISOString().split('T')[0]).toBe('2025-01-15');
-    });
-
-    it('should handle single day interval', () => {
-      const startDate = new Date('2025-01-09');
-      const nextDate = calculateNextReviewDate(startDate, 1);
-      
-      expect(nextDate.toISOString().split('T')[0]).toBe('2025-01-10');
-    });
-  });
-
-  describe('qualityToNumber', () => {
-    it('should convert quality ratings correctly', () => {
-      expect(qualityToNumber('fruitful')).toBe(0);
-      expect(qualityToNumber('skip')).toBe(3);
-      expect(qualityToNumber('unfruitful')).toBe(5);
     });
   });
 });

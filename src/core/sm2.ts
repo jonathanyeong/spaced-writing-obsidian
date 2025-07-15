@@ -1,7 +1,10 @@
-import { SM2Result, QUALITY_MAPPING } from '../types/settings';
-import type { WritingEntry } from '../types/settings';
-
 export const INITIAL_EASE_FACTOR = 2.5;
+
+interface SM2Result {
+  interval: number;
+  repetitions: number;
+  easeFactor: number;
+}
 
 /**
  * Implements the SM-2 (SuperMemo 2) spaced repetition algorithm
@@ -53,49 +56,6 @@ export function calculateSM2(
     repetitions: newRepetitions,
     easeFactor: newEaseFactor
   };
-}
-
-/**
- * Calculate the next review date based on current date and interval
- * @param currentDate - Current date
- * @param intervalDays - Interval in days
- * @returns Next review date
- */
-export function calculateNextReviewDate(currentDate: Date, intervalDays: number): Date {
-  const nextDate = new Date(currentDate);
-  nextDate.setDate(nextDate.getDate() + intervalDays);
-  return nextDate;
-}
-
-/**
- * Get entries that are due for review
- * @param entries - All writing entries
- * @param currentDate - Current date (defaults to now)
- * @param limit - Maximum number of entries to return
- * @returns Array of entries due for review
- */
-export function getDueEntries(
-  entries: WritingEntry[],
-  currentDate: Date = new Date(),
-  limit?: number
-): WritingEntry[] {
-  const dueEntries = entries
-    .filter(entry =>
-      entry.status === 'active' &&
-      entry.nextReview <= currentDate
-    )
-    .sort((a, b) => a.nextReview.getTime() - b.nextReview.getTime());
-
-  return limit ? dueEntries.slice(0, limit) : dueEntries;
-}
-
-/**
- * Convert quality rating to numeric value
- * @param rating - Quality rating ('fruitful', 'skip', 'unfruitful')
- * @returns Numeric quality value (0, 3, or 5)
- */
-export function qualityToNumber(rating: keyof typeof QUALITY_MAPPING): number {
-  return QUALITY_MAPPING[rating];
 }
 
 /**
