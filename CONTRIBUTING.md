@@ -1,0 +1,2 @@
+# Contributing to Writing Inbox
+
