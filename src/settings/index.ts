@@ -1,15 +1,20 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
-import WritingInboxPlugin from 'src/main';
+import type WritingInboxPlugin from '../main';
 
+import { App, PluginSettingTab, Setting } from 'obsidian';
 
 export interface PluginSettings {
   writingInboxFolder: string;
   dailyLimit: string;
   reviewTime: string;
-  showStats: boolean;
 }
 
-export class SampleSettingTab extends PluginSettingTab {
+export const DEFAULT_SETTINGS: PluginSettings = {
+	writingInboxFolder: 'writing-inbox',
+	dailyLimit: '10',
+	reviewTime: '09:00'
+};
+
+export class WritingInboxSettingTab extends PluginSettingTab {
 	plugin: WritingInboxPlugin;
 
 	constructor(app: App, plugin: WritingInboxPlugin) {
@@ -22,14 +27,38 @@ export class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		containerEl.createEl('h2', { text: 'Writing Inbox Settings' });
+
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('Writing Inbox Folder')
+			.setDesc('The folder where writing entries will be stored')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
+				.setPlaceholder('Example: folder1/folder2')
+				.setValue(this.plugin.settings.writingInboxFolder)
+				.onChange(async (value) => {
+					this.plugin.settings.writingInboxFolder = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Daily Entry Limit')
+			.setDesc('Maximum number of entries to review per day')
+			.addText(text => text
+				.setPlaceholder('10')
 				.setValue(this.plugin.settings.dailyLimit)
 				.onChange(async (value) => {
 					this.plugin.settings.dailyLimit = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Review Time')
+			.setDesc('Preferred time for daily reviews (HH:MM format)')
+			.addText(text => text
+				.setPlaceholder('09:00')
+				.setValue(this.plugin.settings.reviewTime)
+				.onChange(async (value) => {
+					this.plugin.settings.reviewTime = value;
 					await this.plugin.saveSettings();
 				}));
 	}

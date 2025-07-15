@@ -1,80 +1,54 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin } from 'obsidian';
 import type { PluginSettings } from './settings';
-import { SampleSettingTab } from './settings';
 
-export const DEFAULT_SETTINGS: PluginSettings = {
-  writingInboxFolder: 'writing-inbox',
-  dailyLimit: '10',
-  reviewTime: '09:00',
-  showStats: true
-};
+import { Notice, Plugin, TFolder } from 'obsidian';
+import { DEFAULT_SETTINGS, WritingInboxSettingTab } from './settings';
+import { EntryManager } from './core/entry-manager';
+import { DailyReviewModal } from './ui/daily-review-modal';
+import { NewEntryModal } from './ui/new-entry-modal';
 
 export default class WritingInboxPlugin extends Plugin {
 	settings: PluginSettings;
+	entryManager: EntryManager;
 
 	async onload() {
 		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Writing Inbox', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+		this.entryManager = new EntryManager(this.app.vault);
+
+		// Ribbon icon for daily review
+		this.addRibbonIcon('book-open', 'Start Daily Review', () => {
+			this.startDailyReview();
 		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
+		// Command: Start Daily Review
 		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
+			id: 'start-daily-review',
+			name: 'Start Daily Review',
 			callback: () => {
-				new SampleModal(this.app).open();
+				this.startDailyReview();
 			}
 		});
-		// This adds an editor command that can perform some operation on the current editor instance
+
+		// Command: Add New Entry
 		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
+			id: 'add-new-entry',
+			name: 'Add New Entry',
+			callback: () => {
+				this.addNewEntry();
 			}
 		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
+
+		// Command: Open Writing Inbox Folder
 		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
+			id: 'open-writing-inbox-folder',
+			name: 'Open Writing Inbox Folder',
+			callback: () => {
+				this.openWritingInboxFolder();
 			}
 		});
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		// Settings tab
+		this.addSettingTab(new WritingInboxSettingTab(this.app, this));
 	}
 
 	onunload() {
@@ -88,21 +62,61 @@ export default class WritingInboxPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
-}
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
+	private async startDailyReview() {
+		try {
+			await this.ensureFoldersExist();
+			const modal = new DailyReviewModal(this.app, this.entryManager, this.settings.writingInboxFolder);
+			modal.open();
+		} catch (error) {
+			console.error('Error starting daily review:', error);
+			new Notice('Error starting daily review. Please check your settings.');
+		}
 	}
 
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
+	private async addNewEntry() {
+		try {
+			await this.ensureFoldersExist();
+			const modal = new NewEntryModal(this.app, this.entryManager, this.settings.writingInboxFolder);
+			modal.open();
+		} catch (error) {
+			console.error('Error opening new entry modal:', error);
+			new Notice('Error creating new entry. Please check your settings.');
+		}
 	}
 
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
+	private async openWritingInboxFolder() {
+		const folder = this.app.vault.getAbstractFileByPath(this.settings.writingInboxFolder);
+		if (folder instanceof TFolder) {
+			// Navigate to the folder in the file explorer instead of trying to open it as a file
+			this.app.workspace.getLeaf().setViewState({
+				type: 'file-explorer',
+				state: { file: folder.path }
+			});
+		} else {
+			new Notice(`Writing inbox folder not found: ${this.settings.writingInboxFolder}`);
+		}
+	}
+
+	private async ensureFoldersExist() {
+		const basePath = this.settings.writingInboxFolder;
+		const entriesPath = `${basePath}/entries`;
+		const archivePath = `${basePath}/archive`;
+
+		// Create base folder if it doesn't exist
+		if (!this.app.vault.getAbstractFileByPath(basePath)) {
+			await this.app.vault.createFolder(basePath);
+		}
+
+		// Create entries folder if it doesn't exist
+		if (!this.app.vault.getAbstractFileByPath(entriesPath)) {
+			await this.app.vault.createFolder(entriesPath);
+		}
+
+		// Create archive folder if it doesn't exist
+		if (!this.app.vault.getAbstractFileByPath(archivePath)) {
+			await this.app.vault.createFolder(archivePath);
+		}
 	}
 }
 
