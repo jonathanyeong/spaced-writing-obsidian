@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateSM2 } from './sm2';
+import { calculateSM2 } from '../sm2/sm2';
 
 describe('SM-2 Algorithm', () => {
   describe('calculateSM2', () => {
