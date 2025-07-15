@@ -1,8 +1,9 @@
 import { TFile, TFolder, Vault } from 'obsidian';
 import matter from 'gray-matter';
-import type { WritingEntry } from '../types/settings';
-import { getInitialSM2Values } from './sm2';
+import type { WritingEntry } from './writingInbox';
+import { getInitialSM2Values } from '../sm2/sm2';
 
+// This class feels like the repository. Where it's reading and writing markdown files to Obsidian.
 
 export interface EntryFrontmatter {
   id: string;
