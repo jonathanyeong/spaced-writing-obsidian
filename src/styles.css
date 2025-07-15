@@ -1,0 +1,208 @@
+/* Writing Inbox Plugin Styles */
+
+.writing-inbox-content-container {
+  margin: 16px 0;
+}
+
+.writing-inbox-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-family: var(--font-monospace);
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.writing-inbox-new-entry-textarea {
+  min-height: 200px;
+}
+
+.writing-inbox-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+  box-shadow: 0 0 0 2px var(--interactive-accent-hover);
+}
+
+.writing-inbox-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-normal);
+}
+
+.writing-inbox-progress {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  padding: 8px;
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.writing-inbox-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+}
+
+.writing-inbox-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.writing-inbox-btn:hover {
+  transform: translateY(-1px);
+}
+
+.writing-inbox-btn-fruitful {
+  background: var(--color-green);
+  color: white;
+}
+
+.writing-inbox-btn-fruitful:hover {
+  background: var(--color-green-hover, #22c55e);
+}
+
+.writing-inbox-btn-skip {
+  background: var(--color-yellow);
+  color: var(--text-on-accent);
+}
+
+.writing-inbox-btn-skip:hover {
+  background: var(--color-yellow-hover, #f59e0b);
+}
+
+.writing-inbox-btn-unfruitful {
+  background: var(--color-red);
+  color: white;
+}
+
+.writing-inbox-btn-unfruitful:hover {
+  background: var(--color-red-hover, #ef4444);
+}
+
+.writing-inbox-btn-archive {
+  background: var(--interactive-normal);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.writing-inbox-btn-archive:hover {
+  background: var(--interactive-hover);
+}
+
+.writing-inbox-btn-nav {
+  background: var(--interactive-normal);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.writing-inbox-btn-nav:hover {
+  background: var(--interactive-hover);
+}
+
+.writing-inbox-btn-close {
+  background: var(--background-modifier-error);
+  color: var(--text-normal);
+  border: 1px solid var(--background-modifier-border);
+}
+
+.writing-inbox-btn-close:hover {
+  background: var(--background-modifier-error-hover);
+}
+
+.writing-inbox-navigation {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.writing-inbox-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.writing-inbox-no-entries {
+  text-align: center;
+  font-size: 18px;
+  color: var(--text-muted);
+  margin: 40px 0;
+  padding: 20px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+}
+
+.writing-inbox-completion {
+  text-align: center;
+  font-size: 20px;
+  color: var(--color-green);
+  margin: 40px 0;
+  padding: 20px;
+  background: var(--background-secondary);
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.writing-inbox-setting-item {
+  margin: 16px 0;
+}
+
+.writing-inbox-setting-item label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.writing-inbox-setting-item input,
+.writing-inbox-setting-item select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.writing-inbox-setting-item input:focus,
+.writing-inbox-setting-item select:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.writing-inbox-setting-description {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .writing-inbox-actions {
+    flex-direction: column;
+  }
+  
+  .writing-inbox-navigation {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+  
+  .writing-inbox-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
