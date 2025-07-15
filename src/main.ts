@@ -2,18 +2,18 @@ import type { PluginSettings } from './settings';
 
 import { Notice, Plugin, TFolder } from 'obsidian';
 import { DEFAULT_SETTINGS, WritingInboxSettingTab } from './settings';
-import { EntryManager } from './core/entry-manager';
+import { WritingInbox } from './core/writingInbox';
 import { DailyReviewModal } from './ui/daily-review-modal';
-import { NewEntryModal } from './ui/new-entry-modal';
+import { NewEntryModal } from './ui/newEntryModal';
 
 export default class WritingInboxPlugin extends Plugin {
 	settings: PluginSettings;
-	entryManager: EntryManager;
+	writingInbox: WritingInbox;
 
 	async onload() {
 		await this.loadSettings();
 
-		this.entryManager = new EntryManager(this.app.vault);
+		this.writingInbox = new WritingInbox(this.app.vault);
 
 		// Ribbon icon for daily review
 		this.addRibbonIcon('book-open', 'Start Daily Review', () => {
@@ -66,7 +66,7 @@ export default class WritingInboxPlugin extends Plugin {
 	private async startDailyReview() {
 		try {
 			await this.ensureFoldersExist();
-			const modal = new DailyReviewModal(this.app, this.entryManager, this.settings.writingInboxFolder);
+			const modal = new DailyReviewModal(this.app, this.writingInbox, this.settings.writingInboxFolder);
 			modal.open();
 		} catch (error) {
 			console.error('Error starting daily review:', error);
@@ -77,7 +77,7 @@ export default class WritingInboxPlugin extends Plugin {
 	private async addNewEntry() {
 		try {
 			await this.ensureFoldersExist();
-			const modal = new NewEntryModal(this.app, this.entryManager, this.settings.writingInboxFolder);
+			const modal = new NewEntryModal(this.app, this.writingInbox, this.settings.writingInboxFolder);
 			modal.open();
 		} catch (error) {
 			console.error('Error opening new entry modal:', error);

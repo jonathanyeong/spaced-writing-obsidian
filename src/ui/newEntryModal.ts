@@ -1,18 +1,18 @@
 import { App, Modal, Notice } from 'obsidian';
-import { EntryManager } from '../core/entry-manager';
+import { WritingInbox } from '../core/writingInbox';
 
 export class NewEntryModal extends Modal {
-  private entryManager: EntryManager;
+  private writingInbox: WritingInbox;
   private folder: string;
   private textArea: HTMLTextAreaElement;
 
   constructor(
-    app: App, 
-    entryManager: EntryManager, 
+    app: App,
+    writingInbox: WritingInbox,
     folder: string
   ) {
     super(app);
-    this.entryManager = entryManager;
+    this.writingInbox = writingInbox;
     this.folder = folder;
   }
 
@@ -72,7 +72,7 @@ export class NewEntryModal extends Modal {
     }
 
     try {
-      await this.entryManager.createEntry(content, this.folder);
+      await this.writingInbox.createEntry(content, this.folder);
       new Notice('Entry created successfully!');
       this.close();
     } catch (error) {
