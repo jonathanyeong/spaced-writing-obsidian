@@ -18,7 +18,6 @@ export interface EntryFrontmatter {
   interval: number;
   easeFactor: number;
   repetitions: number;
-  status: 'active' | 'archived';
 }
 
 export interface WritingEntry {
@@ -32,18 +31,15 @@ export interface WritingEntry {
   easeFactor: number;
   repetitions: number;
   quality: number;
-  status: 'active' | 'archived';
+  path: string;
 }
-
-// EntryManager takes the fileManager and uses it to do business logic stuff.
-// These methods are called by the UIs
 
 export class WritingInbox {
   constructor(private vault: Vault) {}
 
   /**
    * Create a new writing entry
-   * @param content - The initial content of the entry
+   * @param content - The body content to save to file
    * @param folder - The writing inbox folder path
    */
   async createEntry(content: string, folder: string): Promise<void> {
@@ -52,7 +48,6 @@ export class WritingInbox {
     const title = content.split('\n')[0].slice(0, 50).replace(/[^a-zA-Z0-9\s]/g, '').trim();
     const filename = `${dateStr}-${title.toLowerCase().replace(/\s+/g, '-')}.md`;
     const filepath = `${folder}/entries/${filename}`;
-
     const { interval, repetitions, easeFactor } = getInitialSM2Values();
 
     // Create ID with format: YYYYMMDDHHmmss (UTC time)
@@ -68,7 +63,6 @@ export class WritingInbox {
       interval,
       easeFactor,
       repetitions,
-      status: 'active'
     };
 
     const fileContent = matter.stringify(content, frontmatter);
@@ -79,26 +73,16 @@ export class WritingInbox {
   }
 
   /**
-   * Get a writing entry by its file
-   * @param file - The TFile to read
-   * @returns The WritingEntry or null if not found
-   */
-  async getEntry(file: TFile): Promise<WritingEntry | null> {
-    return this.readEntry(file);
-  }
-
-  /**
    * Update an entry's content and SM-2 scheduling based on quality rating
    * @param file - The file to update
    * @param content - The new content
    * @param quality - The quality rating
-   * @returns The updated WritingEntry
    */
-  async updateEntry(
+  async reviewEntry(
     file: TFile,
     content: string,
     quality: QualityRating
-  ): Promise<WritingEntry> {
+  ): Promise<void> {
     const entry = await this.readEntry(file);
 
     if (!entry) {
@@ -118,74 +102,33 @@ export class WritingInbox {
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + sm2Result.interval);
 
-    // Update the entry
-    const updatedEntry: WritingEntry = {
-      ...entry,
-      content,
-      lastReviewed: new Date(),
-      nextReview,
-      lastModified: new Date(),
+    // Update frontmatter
+    const frontmatter: EntryFrontmatter = {
+      id: entry.id,
+      lastReviewed: new Date().toISOString(),
+      nextReview: nextReview.toISOString(),
+      lastModified: new Date().toISOString(),
       interval: sm2Result.interval,
       easeFactor: sm2Result.easeFactor,
       repetitions: sm2Result.repetitions,
-      quality: qualityValue
-    };
-
-    const frontmatter: EntryFrontmatter = {
-      id: updatedEntry.id,
-      lastReviewed: updatedEntry.lastReviewed.toISOString(),
-      nextReview: updatedEntry.nextReview.toISOString(),
-      lastModified: new Date().toISOString(),
-      interval: updatedEntry.interval,
-      easeFactor: updatedEntry.easeFactor,
-      repetitions: updatedEntry.repetitions,
-      status: updatedEntry.status
     };
 
     const fileContent = matter.stringify(content, frontmatter);
     await this.vault.modify(file, fileContent);
-
-    return updatedEntry;
   }
 
   /**
-   * Archive an entry
+   * Archive an entry by moving it to the archive/ folder
    * @param file - The file to archive
    */
   async archiveEntry(file: TFile): Promise<void> {
-    // First, update the status in frontmatter
-    const content = await this.vault.read(file);
-    const { data, content: body } = matter(content);
-
-    const frontmatter = data as EntryFrontmatter;
-    frontmatter.status = 'archived';
-    frontmatter.lastModified = new Date().toISOString();
-
-    const updatedContent = matter.stringify(body, frontmatter);
-    await this.vault.modify(file, updatedContent);
-
-    // Then move to archive folder
-    const newPath = file.path.replace('/entries/', '/archive/');
-    await this.vault.rename(file, newPath);
-  }
-
-  /**
-   * Get all active entries from the writing inbox
-   * @param folder - The writing inbox folder path
-   * @returns Array of WritingEntry objects
-   */
-  async getActiveEntries(folder: string): Promise<WritingEntry[]> {
-    const files = await this.getEntryFiles(folder);
-    const entries: WritingEntry[] = [];
-
-    for (const file of files) {
-      const entry = await this.readEntry(file);
-      if (entry && entry.status === 'active') {
-        entries.push(entry);
-      }
+    const entry = await this.vault.read(file);
+    if (!entry) {
+      throw new Error('Entry not found');
     }
 
-    return entries;
+    const newPath = file.path.replace('/entries/', '/archive/');
+    await this.vault.rename(file, newPath);
   }
 
   /**
@@ -204,60 +147,41 @@ export class WritingInbox {
   /**
    * Get the corresponding TFile for an entry
    * @param entry - The WritingEntry
+   * @returns The TFile
+   */
+  async getFileForEntry(entry: WritingEntry): Promise<TFile> {
+    const file = this.vault.getFileByPath(entry.path)
+
+    if (!file) {
+      throw new Error('File not found');
+    }
+
+    return file
+  }
+
+  /**
+   * Get all active entries from the writing inbox
    * @param folder - The writing inbox folder path
-   * @returns The TFile or null if not found
+   * @returns Array of WritingEntry objects
    */
-  async getFileForEntry(entry: WritingEntry, folder: string): Promise<TFile | null> {
-    const files = await this.getEntryFiles(folder);
-
-    for (const file of files) {
-      const fileEntry = await this.readEntry(file);
-      if (fileEntry && fileEntry.id === entry.id) {
-        return file;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Check if an entry was manually edited and reset if needed
-   * @param file - The file to check
-   * @returns True if the entry was manually edited
-   */
-  async checkAndHandleManualEdit(file: TFile): Promise<boolean> {
-    const entry = await this.readEntry(file);
-
-    if (!entry) {
-      return false;
-    }
-
-    // The FileManager already detects manual edits and sets quality to 0
-    // This method is here for explicit checking if needed
-    return entry.quality === 0;
-  }
-
-  /**
-   * Get all entry files from a folder
-   * @param folder - The folder to search in
-   * @returns Array of TFile objects
-   */
-  async getEntryFiles(folder: string): Promise<TFile[]> {
+  private async getActiveEntries(folder: string): Promise<WritingEntry[]> {
     const entriesPath = `${folder}/entries`;
     const entriesFolder = this.vault.getAbstractFileByPath(entriesPath);
 
     if (!entriesFolder || !(entriesFolder instanceof TFolder)) {
       return [];
     }
-
-    const files: TFile[] = [];
-    for (const child of entriesFolder.children) {
-      if (child instanceof TFile && child.extension === 'md') {
-        files.push(child);
+    const entries: WritingEntry[] = [];
+    for (const file of entriesFolder.children) {
+      if (file instanceof TFile && file.extension === 'md') {
+        const entry = await this.readEntry(file);
+        if (entry) {
+          entries.push(entry);
+        }
       }
     }
 
-    return files;
+    return entries;
   }
 
   /**
@@ -293,7 +217,7 @@ export class WritingInbox {
         easeFactor: frontmatter.easeFactor,
         repetitions: frontmatter.repetitions,
         quality: wasManuallyEdited ? 0 : -1, // 0 if manually edited (fruitful), -1 otherwise
-        status: frontmatter.status
+        path: file.path
       };
     } catch (error) {
       console.error('Error reading entry file:', error);

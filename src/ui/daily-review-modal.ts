@@ -183,7 +183,7 @@ export class DailyReviewModal extends Modal {
 
     try {
       const content = this.textArea.value;
-      await this.writingInbox.updateEntry(this.currentFile, content, quality);
+      await this.writingInbox.reviewEntry(this.currentFile, content, quality);
 
       new Notice(`Entry marked as ${quality}`);
 
@@ -239,7 +239,7 @@ export class DailyReviewModal extends Modal {
     if (this.currentFile && this.textArea.value !== this.entries[this.currentIndex].content) {
       try {
         const currentEntry = this.entries[this.currentIndex];
-        await this.writingInbox.updateEntry(this.currentFile, this.textArea.value, 'skip');
+        await this.writingInbox.reviewEntry(this.currentFile, this.textArea.value, 'skip');
       } catch (error) {
         console.error('Error saving current entry:', error);
       }
