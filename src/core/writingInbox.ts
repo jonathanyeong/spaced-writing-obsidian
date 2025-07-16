@@ -21,17 +21,9 @@ export interface EntryFrontmatter {
 }
 
 export interface WritingEntry {
-  id: string;
   content: string;
-  dateCreated: Date;
-  lastReviewed: Date;
-  nextReview: Date;
-  lastModified: Date;
-  interval: number;
-  easeFactor: number;
-  repetitions: number;
-  quality: number;
   path: string;
+  frontmatter: EntryFrontmatter
 }
 
 export class WritingInbox {
@@ -88,14 +80,14 @@ export class WritingInbox {
     if (!entry) {
       throw new Error('Entry not found');
     }
-
+    const { repetitions, easeFactor, interval } = entry.frontmatter
     // Calculate new SM-2 values
     const qualityValue = QUALITY_MAPPING[quality];
     const sm2Result = calculateSM2(
       qualityValue,
-      entry.repetitions,
-      entry.easeFactor,
-      entry.interval
+      repetitions,
+      easeFactor,
+      interval
     );
 
     // Calculate next review date
@@ -103,8 +95,9 @@ export class WritingInbox {
     nextReview.setDate(nextReview.getDate() + sm2Result.interval);
 
     // Update frontmatter
+
     const frontmatter: EntryFrontmatter = {
-      id: entry.id,
+      ...entry.frontmatter,
       lastReviewed: new Date().toISOString(),
       nextReview: nextReview.toISOString(),
       lastModified: new Date().toISOString(),
@@ -141,7 +134,7 @@ export class WritingInbox {
     const today = new Date();
     today.setHours(23, 59, 59, 999); // End of today
 
-    return activeEntries.filter(entry => entry.nextReview <= today);
+    return activeEntries.filter(entry => new Date(entry.frontmatter.nextReview) <= today);
   }
 
   /**
@@ -201,22 +194,9 @@ export class WritingInbox {
 
       const frontmatter = data as EntryFrontmatter;
 
-      // Check if file was manually modified
-      const fileModTime = new Date(file.stat.mtime);
-      const lastModified = new Date(frontmatter.lastModified);
-      const wasManuallyEdited = fileModTime > lastModified;
-
       return {
-        id: frontmatter.id,
-        dateCreated: new Date(file.stat.ctime),
         content: body.trim(),
-        lastReviewed: new Date(frontmatter.lastReviewed),
-        nextReview: new Date(frontmatter.nextReview),
-        lastModified: wasManuallyEdited ? fileModTime : lastModified,
-        interval: frontmatter.interval,
-        easeFactor: frontmatter.easeFactor,
-        repetitions: frontmatter.repetitions,
-        quality: wasManuallyEdited ? 0 : -1, // 0 if manually edited (fruitful), -1 otherwise
+        frontmatter,
         path: file.path
       };
     } catch (error) {
