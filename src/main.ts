@@ -1,6 +1,6 @@
 import type { PluginSettings } from './settings';
 
-import { Notice, Plugin, TFolder } from 'obsidian';
+import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, WritingInboxSettingTab } from './settings';
 import { WritingInbox } from './core/writingInbox';
 import { DailyReviewModal } from './ui/daily-review-modal';
@@ -15,12 +15,10 @@ export default class WritingInboxPlugin extends Plugin {
 
 		this.writingInbox = new WritingInbox(this.app.vault);
 
-		// Ribbon icon for daily review
 		this.addRibbonIcon('book-open', 'Start Daily Review', () => {
 			this.startDailyReview();
 		});
 
-		// Command: Start Daily Review
 		this.addCommand({
 			id: 'start-daily-review',
 			name: 'Start Daily Review',
@@ -29,7 +27,6 @@ export default class WritingInboxPlugin extends Plugin {
 			}
 		});
 
-		// Command: Add New Entry
 		this.addCommand({
 			id: 'add-new-entry',
 			name: 'Add New Entry',
@@ -38,16 +35,6 @@ export default class WritingInboxPlugin extends Plugin {
 			}
 		});
 
-		// Command: Open Writing Inbox Folder
-		this.addCommand({
-			id: 'open-writing-inbox-folder',
-			name: 'Open Writing Inbox Folder',
-			callback: () => {
-				this.openWritingInboxFolder();
-			}
-		});
-
-		// Settings tab
 		this.addSettingTab(new WritingInboxSettingTab(this.app, this));
 	}
 
@@ -82,19 +69,6 @@ export default class WritingInboxPlugin extends Plugin {
 		} catch (error) {
 			console.error('Error opening new entry modal:', error);
 			new Notice('Error creating new entry. Please check your settings.');
-		}
-	}
-
-	private async openWritingInboxFolder() {
-		const folder = this.app.vault.getAbstractFileByPath(this.settings.writingInboxFolder);
-		if (folder instanceof TFolder) {
-			// Navigate to the folder in the file explorer instead of trying to open it as a file
-			this.app.workspace.getLeaf().setViewState({
-				type: 'file-explorer',
-				state: { file: folder.path }
-			});
-		} else {
-			new Notice(`Writing inbox folder not found: ${this.settings.writingInboxFolder}`);
 		}
 	}
 
