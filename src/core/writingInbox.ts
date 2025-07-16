@@ -185,6 +185,9 @@ export class WritingInbox {
   private async readEntry(file: TFile): Promise<WritingEntry | null> {
     try {
       const content = await this.vault.read(file);
+      if (!content) {
+        return null
+      }
       const { data, content: body } = matter(content);
 
       // Check if this is a valid entry file
@@ -195,7 +198,7 @@ export class WritingInbox {
       const frontmatter = data as EntryFrontmatter;
 
       return {
-        content: body.trim(),
+        content: body,
         frontmatter,
         path: file.path
       };
