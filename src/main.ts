@@ -3,7 +3,7 @@ import type { PluginSettings } from './settings';
 import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, WritingInboxSettingTab } from './settings';
 import { WritingInbox } from './core/writingInbox';
-import { DailyReviewModal } from './ui/daily-review-modal';
+import { DailyReviewModal } from './ui/dailyReviewModal';
 import { NewEntryModal } from './ui/newEntryModal';
 
 export default class WritingInboxPlugin extends Plugin {

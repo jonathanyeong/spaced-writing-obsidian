@@ -189,7 +189,7 @@ export class WritingInbox {
    * @param file - The Obsidian TFile to read
    * @returns WritingEntry or null if invalid
    */
-  async readEntry(file: TFile): Promise<WritingEntry | null> {
+  private async readEntry(file: TFile): Promise<WritingEntry | null> {
     try {
       const content = await this.vault.read(file);
       const { data, content: body } = matter(content);

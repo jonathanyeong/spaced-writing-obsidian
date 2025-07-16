@@ -157,7 +157,7 @@ export class DailyReviewModal extends Modal {
     const entry = this.entries[this.currentIndex];
 
     // Get the file for this entry
-    this.currentFile = await this.writingInbox.getFileForEntry(entry, this.folder);
+    this.currentFile = await this.writingInbox.getFileForEntry(entry);
 
     if (!this.currentFile) {
       new Notice('Error: Could not find file for entry');
