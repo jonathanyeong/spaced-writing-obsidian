@@ -125,22 +125,6 @@ export class DailyReviewModal extends Modal {
       cls: 'writing-inbox-navigation'
     });
 
-    if (this.currentIndex > 0) {
-      const prevBtn = navContainer.createEl('button', {
-        text: 'Previous',
-        cls: 'writing-inbox-btn writing-inbox-btn-nav'
-      });
-      prevBtn.onclick = () => this.navigateToEntry(this.currentIndex - 1);
-    }
-
-    if (this.currentIndex < this.entries.length - 1) {
-      const nextBtn = navContainer.createEl('button', {
-        text: 'Next',
-        cls: 'writing-inbox-btn writing-inbox-btn-nav'
-      });
-      nextBtn.onclick = () => this.navigateToEntry(this.currentIndex + 1);
-    }
-
     const closeBtn = navContainer.createEl('button', {
       text: 'Close',
       cls: 'writing-inbox-btn writing-inbox-btn-close'
@@ -228,25 +212,6 @@ export class DailyReviewModal extends Modal {
       console.error('Error archiving entry:', error);
       new Notice('Error archiving entry');
     }
-  }
-
-  private async navigateToEntry(index: number) {
-    if (index < 0 || index >= this.entries.length) {
-      return;
-    }
-
-    // Save current content before navigating
-    if (this.currentFile && this.textArea.value !== this.entries[this.currentIndex].content) {
-      try {
-        const currentEntry = this.entries[this.currentIndex];
-        await this.writingInbox.reviewEntry(this.currentFile, this.textArea.value, 'skip');
-      } catch (error) {
-        console.error('Error saving current entry:', error);
-      }
-    }
-
-    this.currentIndex = index;
-    await this.displayCurrentEntry();
   }
 
   private showCompletionMessage() {
