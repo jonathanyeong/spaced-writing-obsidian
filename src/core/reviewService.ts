@@ -1,6 +1,6 @@
 import { App, TFile, Notice, WorkspaceLeaf, MarkdownView } from 'obsidian';
-import { WritingInbox } from '../core/writingInbox';
-import type { WritingEntry, QualityRating } from '../core/writingInbox';
+import { WritingInbox } from './writingInbox';
+import type { WritingEntry, QualityRating } from './writingInbox';
 import { EditorView } from '@codemirror/view';
 import { toggleReviewMode } from '../extensions/reviewExtension';
 

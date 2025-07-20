@@ -4,7 +4,7 @@ import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, WritingInboxSettingTab } from './settings';
 import { WritingInbox } from './core/writingInbox';
 import { NewEntryModal } from './ui/newEntryModal';
-import { ReviewService } from './services/reviewService';
+import { ReviewService } from './core/reviewService';
 import { createReviewExtension, reviewModeField } from './extensions/reviewExtension';
 
 export default class WritingInboxPlugin extends Plugin {
