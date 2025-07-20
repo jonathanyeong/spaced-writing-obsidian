@@ -103,7 +103,8 @@
 }
 
 .writing-inbox-btn-archive:hover {
-  background: var(--interactive-hover);
+  background: var(--color-blue);
+  color: white
 }
 
 .writing-inbox-btn-nav {
@@ -191,18 +192,51 @@
   margin-top: 4px;
 }
 
+/* Review buttons in editor */
+.writing-inbox-review-buttons {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  margin: 16px;
+  background: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 600px;
+}
+
+.writing-inbox-review-buttons .writing-inbox-btn {
+  min-width: 80px;
+}
+
 @media (max-width: 600px) {
   .writing-inbox-actions {
     flex-direction: column;
   }
-  
+
   .writing-inbox-navigation {
     margin-left: 0;
     margin-top: 8px;
   }
-  
+
   .writing-inbox-btn {
     width: 100%;
     text-align: center;
+  }
+
+  .writing-inbox-review-buttons {
+    flex-direction: column;
+  }
+
+  .writing-inbox-review-buttons .writing-inbox-btn {
+    width: 100%;
+    min-width: auto;
   }
 }
