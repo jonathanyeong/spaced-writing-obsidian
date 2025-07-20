@@ -6,7 +6,11 @@ on:
       - "*"
 
 jobs:
+  run-ci:
+    uses: ./.github/workflows/ci.yml
+
   build:
+    needs: run-ci
     runs-on: ubuntu-latest
     permissions:
       contents: write
