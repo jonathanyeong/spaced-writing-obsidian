@@ -32,7 +32,7 @@ export function calculateSM2(
   prevEaseFactor = Math.max(1.3, prevEaseFactor);
   prevInterval = Math.max(1, prevInterval);
 
-  var newInterval, newRepetitions, newEaseFactor;
+  let newInterval, newRepetitions, newEaseFactor;
 
   if (quality >= 3) {
     if (repetitions === 0) {

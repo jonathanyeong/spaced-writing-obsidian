@@ -10,7 +10,7 @@ export const toggleReviewMode = StateEffect.define<boolean>();
 export const reviewModeField = StateField.define<boolean>({
   create: () => false,
   update: (value, tr) => {
-    for (let e of tr.effects) {
+    for (const e of tr.effects) {
       if (e.is(toggleReviewMode)) {
         return e.value;
       }
@@ -66,7 +66,7 @@ function createReviewButtons(
   buttonContainer.appendChild(skipBtn);
   buttonContainer.appendChild(unfruitfulBtn);
   buttonContainer.appendChild(archiveBtn);
-  
+
   container.appendChild(buttonContainer);
 
   return container;

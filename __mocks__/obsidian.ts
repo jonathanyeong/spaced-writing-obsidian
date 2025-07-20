@@ -51,7 +51,7 @@ export class Vault extends EventEmitter {
     getFiles() {
         return [];
     }
-    trigger(name: string, ...data: any[]): void {
+    trigger(name: string, ...data: unknown[]): void {
         this.emit(name, ...data);
     }
 }

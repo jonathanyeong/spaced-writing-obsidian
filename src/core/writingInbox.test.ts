@@ -1,5 +1,8 @@
+import type { WritingEntry, EntryFrontmatter} from './writingInbox';
+import type { Mock } from 'vitest';
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { WritingInbox, QUALITY_MAPPING, type QualityRating, type WritingEntry, type EntryFrontmatter } from './writingInbox';
+import { WritingInbox } from './writingInbox';
 import { TFile, TFolder, Vault } from 'obsidian';
 import matter from 'gray-matter';
 
@@ -67,7 +70,7 @@ describe('WritingInbox', () => {
               file.extension = 'md';
               return file;
             });
-          let tfolder = new TFolder
+          const tfolder = new TFolder
           tfolder.children = children
           return tfolder;
         }
@@ -96,7 +99,7 @@ describe('WritingInbox', () => {
       await writingInbox.createEntry(content, folder);
 
       expect(vault.create).toHaveBeenCalledOnce();
-      const [filepath, fileContent] = (vault.create as any).mock.calls[0];
+      const [filepath, fileContent] = (vault.create as Mock).mock.calls[0];
 
       // Check filename
       expect(filepath).toBe('/writing-inbox/entries/2024-01-15-test-entry-title.md');
@@ -122,7 +125,7 @@ describe('WritingInbox', () => {
 
       await writingInbox.createEntry(content, folder);
 
-      const [filepath] = (vault.create as any).mock.calls[0];
+      const [filepath] = (vault.create as Mock).mock.calls[0];
       expect(filepath).toContain('test-entry-title-with-special-characters');
     });
 
@@ -132,12 +135,12 @@ describe('WritingInbox', () => {
 
       await writingInbox.createEntry(content, folder);
 
-      const [filepath] = (vault.create as any).mock.calls[0];
+      const [filepath] = (vault.create as Mock).mock.calls[0];
       expect(filepath).toContain('this-is-a-very-long-title-that-exceeds-fifty-char');
     });
 
     it('should throw error if file creation fails', async () => {
-      (vault.create as any).mockResolvedValueOnce(null);
+      (vault.create as Mock).mockResolvedValueOnce(null);
 
       await expect(writingInbox.createEntry('Test', '/folder')).rejects.toThrowError('Failed to create file');
     });
@@ -171,7 +174,7 @@ describe('WritingInbox', () => {
       await writingInbox.reviewEntry(mockFile as TFile, newContent, 'fruitful');
 
       expect(vault.modify).toHaveBeenCalledOnce();
-      const [file, fileContent] = (vault.modify as any).mock.calls[0];
+      const [file, fileContent] = (vault.modify as Mock).mock.calls[0];
 
       expect(file).toBe(mockFile);
 
@@ -189,7 +192,7 @@ describe('WritingInbox', () => {
 
       await writingInbox.reviewEntry(mockFile as TFile, 'Updated content', 'skip');
 
-      const [, fileContent] = (vault.modify as any).mock.calls[0];
+      const [, fileContent] = (vault.modify as Mock).mock.calls[0];
       const parsed = matter(fileContent);
 
       expect(parsed.data.nextReview).toBe('2024-01-18T14:00:00.000Z'); // 2 days later (interval * 2)
@@ -202,7 +205,7 @@ describe('WritingInbox', () => {
 
       await writingInbox.reviewEntry(mockFile as TFile, 'Updated content', 'unfruitful');
 
-      const [, fileContent] = (vault.modify as any).mock.calls[0];
+      const [, fileContent] = (vault.modify as Mock).mock.calls[0];
       const parsed = matter(fileContent);
 
       expect(parsed.data.nextReview).toBe('2024-01-18T14:00:00.000Z'); // 2 days later
@@ -234,7 +237,7 @@ describe('WritingInbox', () => {
     it('should throw error if entry not found', async () => {
       const mockFile = new TFile();
       mockFile.path = '/writing-inbox/entries/nonexistent.md';
-      (vault.read as any).mockResolvedValueOnce(null);
+      (vault.read as Mock).mockResolvedValueOnce(null);
 
       await expect(writingInbox.archiveEntry(mockFile as TFile))
         .rejects.toThrowError('Entry not found');
@@ -291,7 +294,7 @@ describe('WritingInbox', () => {
     });
 
     it('should return empty array if no entries folder exists', async () => {
-      (vault.getAbstractFileByPath as any).mockReturnValueOnce(null);
+      (vault.getAbstractFileByPath as Mock).mockReturnValueOnce(null);
 
       const results = await writingInbox.getEntriesDueForReview('/writing-inbox');
 
