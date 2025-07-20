@@ -195,14 +195,14 @@
 /* Review buttons in editor */
 .writing-inbox-review-buttons {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   padding: 16px;
   margin: 16px;
   background: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
   border-radius: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -210,6 +210,20 @@
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   max-width: 600px;
+}
+
+.writing-inbox-review-progress {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.writing-inbox-review-button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .writing-inbox-review-buttons .writing-inbox-btn {

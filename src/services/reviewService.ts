@@ -59,8 +59,6 @@ export class ReviewService {
 
     // Enable review mode in the editor
     await this.enableReviewMode(leaf);
-
-    new Notice(`Review ${this.currentReviewIndex + 1} of ${this.currentReviewEntries.length}`);
   }
 
   private async enableReviewMode(leaf: WorkspaceLeaf): Promise<void> {
@@ -113,7 +111,6 @@ export class ReviewService {
       }
 
       await this.writingInbox.reviewEntry(this.currentReviewFile, content, quality);
-      new Notice(`Entry marked as ${quality}`);
 
       // Move to next entry
       this.currentReviewIndex++;
@@ -172,6 +169,13 @@ export class ReviewService {
 
   getCurrentReviewFile(): TFile | null {
     return this.currentReviewFile;
+  }
+
+  getReviewProgress(): { current: number; total: number } {
+    return {
+      current: this.currentReviewIndex,
+      total: this.currentReviewEntries.length
+    };
   }
 
   stopReview(): void {

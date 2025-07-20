@@ -21,10 +21,22 @@ export const reviewModeField = StateField.define<boolean>({
 
 function createReviewButtons(
   onReview: (quality: QualityRating) => Promise<void>,
-  onArchive: () => Promise<void>
+  onArchive: () => Promise<void>,
+  currentIndex: number,
+  totalEntries: number
 ): HTMLElement {
   const container = document.createElement('div');
   container.className = 'writing-inbox-review-buttons';
+
+  // Progress indicator
+  const progressDiv = document.createElement('div');
+  progressDiv.className = 'writing-inbox-review-progress';
+  progressDiv.textContent = `Review ${currentIndex + 1} of ${totalEntries}`;
+  container.appendChild(progressDiv);
+
+  // Button container
+  const buttonContainer = document.createElement('div');
+  buttonContainer.className = 'writing-inbox-review-button-group';
 
   // Fruitful button
   const fruitfulBtn = document.createElement('button');
@@ -50,10 +62,12 @@ function createReviewButtons(
   archiveBtn.className = 'writing-inbox-btn writing-inbox-btn-archive';
   archiveBtn.onclick = () => onArchive();
 
-  container.appendChild(fruitfulBtn);
-  container.appendChild(skipBtn);
-  container.appendChild(unfruitfulBtn);
-  container.appendChild(archiveBtn);
+  buttonContainer.appendChild(fruitfulBtn);
+  buttonContainer.appendChild(skipBtn);
+  buttonContainer.appendChild(unfruitfulBtn);
+  buttonContainer.appendChild(archiveBtn);
+  
+  container.appendChild(buttonContainer);
 
   return container;
 }
@@ -61,7 +75,8 @@ function createReviewButtons(
 export function createReviewExtension(
   getFile: () => TFile | null,
   onReview: (quality: QualityRating) => Promise<void>,
-  onArchive: () => Promise<void>
+  onArchive: () => Promise<void>,
+  getReviewProgress: () => { current: number; total: number }
 ) {
   return ViewPlugin.fromClass(class {
     reviewButtonsElement: HTMLElement | null = null;
@@ -89,7 +104,8 @@ export function createReviewExtension(
 
       // Add buttons if in review mode
       if (isReviewMode && file) {
-        this.reviewButtonsElement = createReviewButtons(onReview, onArchive);
+        const progress = getReviewProgress();
+        this.reviewButtonsElement = createReviewButtons(onReview, onArchive, progress.current, progress.total);
 
         // Find the workspace leaf container and add buttons there
         let container = view.dom;

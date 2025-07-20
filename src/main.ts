@@ -24,7 +24,8 @@ export default class WritingInboxPlugin extends Plugin {
 			createReviewExtension(
 				() => this.reviewService.getCurrentReviewFile(),
 				(quality) => this.reviewService.handleReview(quality),
-				() => this.reviewService.handleArchive()
+				() => this.reviewService.handleArchive(),
+				() => this.reviewService.getReviewProgress()
 			)
 		]);
 
