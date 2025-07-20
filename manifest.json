@@ -1,10 +1,11 @@
 {
 	"id": "writing-inbox",
 	"name": "Writing Inbox",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"minAppVersion": "1.0.0",
-	"description": "Spaced writing inbox plugin.",
+	"description": "Use spaced repetition to help you write",
 	"author": "Jonathan Yeong",
 	"authorUrl": "https://github.com/jonathanyeong/writing-inbox",
+	"fundingUrl": "https://ko-fi.com/jonoyeong",
 	"isDesktopOnly": false
 }
