@@ -1,7 +1,7 @@
 {
-	"id": "writing-inbox",
-	"name": "Writing Inbox",
-	"version": "0.1.1",
+	"id": "spaced-writing-inbox",
+	"name": "Spaced Writing Inbox",
+	"version": "0.2.0",
 	"minAppVersion": "1.0.0",
 	"description": "Use spaced repetition to help you write",
 	"author": "Jonathan Yeong",
