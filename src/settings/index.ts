@@ -5,13 +5,11 @@ import { App, PluginSettingTab, Setting } from 'obsidian';
 export interface PluginSettings {
   writingInboxFolder: string;
   dailyLimit: string;
-  reviewTime: string;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
 	writingInboxFolder: 'writing-inbox',
 	dailyLimit: '10',
-	reviewTime: '09:00'
 };
 
 export class WritingInboxSettingTab extends PluginSettingTab {
@@ -48,17 +46,6 @@ export class WritingInboxSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.dailyLimit)
 				.onChange(async (value) => {
 					this.plugin.settings.dailyLimit = value;
-					await this.plugin.saveSettings();
-				}));
-
-		new Setting(containerEl)
-			.setName('Review Time')
-			.setDesc('Preferred time for daily reviews (HH:MM format)')
-			.addText(text => text
-				.setPlaceholder('09:00')
-				.setValue(this.plugin.settings.reviewTime)
-				.onChange(async (value) => {
-					this.plugin.settings.reviewTime = value;
 					await this.plugin.saveSettings();
 				}));
 	}
