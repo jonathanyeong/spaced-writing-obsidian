@@ -1,11 +1,10 @@
 {
 	"id": "writing-inbox",
 	"name": "Writing Inbox",
-	"version": "1.0.0",
-	"minAppVersion": "0.15.0",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
 	"description": "Spaced writing inbox plugin.",
 	"author": "Jonathan Yeong",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"authorUrl": "https://github.com/jonathanyeong/writing-inbox",
 	"isDesktopOnly": false
 }
