@@ -1,7 +1,6 @@
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
 import { StateField, StateEffect } from '@codemirror/state';
 import { TFile } from 'obsidian';
-import { WritingInbox } from '../core/writingInbox';
 import type { QualityRating } from '../core/writingInbox';
 
 // State effect to toggle review mode
@@ -21,8 +20,6 @@ export const reviewModeField = StateField.define<boolean>({
 });
 
 function createReviewButtons(
-  file: TFile,
-  writingInbox: WritingInbox,
   onReview: (quality: QualityRating) => Promise<void>,
   onArchive: () => Promise<void>
 ): HTMLElement {
@@ -63,7 +60,6 @@ function createReviewButtons(
 
 export function createReviewExtension(
   getFile: () => TFile | null,
-  writingInbox: WritingInbox,
   onReview: (quality: QualityRating) => Promise<void>,
   onArchive: () => Promise<void>
 ) {
@@ -93,7 +89,7 @@ export function createReviewExtension(
 
       // Add buttons if in review mode
       if (isReviewMode && file) {
-        this.reviewButtonsElement = createReviewButtons(file, writingInbox, onReview, onArchive);
+        this.reviewButtonsElement = createReviewButtons(onReview, onArchive);
 
         // Find the workspace leaf container and add buttons there
         let container = view.dom;

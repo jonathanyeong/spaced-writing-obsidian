@@ -21,7 +21,7 @@ export class ReviewService {
     try {
       // Load entries due for review
       this.currentReviewEntries = await this.writingInbox.getEntriesDueForReview(folder);
-      
+
       if (this.currentReviewEntries.length === 0) {
         new Notice('No entries due for review today!');
         return;
@@ -29,10 +29,10 @@ export class ReviewService {
 
       this.currentReviewIndex = 0;
       this.isReviewMode = true;
-      
+
       new Notice(`Starting review of ${this.currentReviewEntries.length} entries`);
       await this.openCurrentEntry();
-      
+
     } catch (error) {
       console.error('Error starting daily review:', error);
       new Notice('Error starting daily review. Please check your settings.');
@@ -66,10 +66,10 @@ export class ReviewService {
   private async enableReviewMode(leaf: WorkspaceLeaf): Promise<void> {
     // Wait a bit for the editor to be ready
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     const view = leaf.view;
     if (view instanceof MarkdownView && view.editor) {
-      // @ts-expect-error - accessing internal editor
+      // @ts-expect-error, not typed - accessing internal editor
       const editorView = view.editor.cm as EditorView;
       if (editorView) {
         editorView.dispatch({
@@ -82,7 +82,7 @@ export class ReviewService {
   private async disableReviewMode(): Promise<void> {
     const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (activeView && activeView.editor) {
-      // @ts-expect-error - accessing internal editor
+      // @ts-expect-error, not typed - accessing internal editor
       const editorView = activeView.editor.cm as EditorView;
       if (editorView) {
         editorView.dispatch({
@@ -102,7 +102,7 @@ export class ReviewService {
       // Get the current content from the active editor
       const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
       let content = '';
-      
+
       if (activeView && activeView.file === this.currentReviewFile && activeView.editor) {
         // Get content from the editor (includes any unsaved changes)
         content = activeView.editor.getValue();
@@ -118,7 +118,7 @@ export class ReviewService {
       // Move to next entry
       this.currentReviewIndex++;
       await this.openCurrentEntry();
-      
+
     } catch (error) {
       console.error('Error reviewing entry:', error);
       new Notice('Error saving entry');
@@ -149,7 +149,7 @@ export class ReviewService {
       } else {
         await this.openCurrentEntry();
       }
-      
+
     } catch (error) {
       console.error('Error archiving entry:', error);
       new Notice('Error archiving entry');
@@ -162,7 +162,7 @@ export class ReviewService {
     this.currentReviewEntries = [];
     this.currentReviewIndex = 0;
     this.currentReviewFile = null;
-    
+
     new Notice('Review completed! Great work!');
   }
 

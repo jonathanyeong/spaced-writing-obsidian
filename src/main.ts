@@ -23,7 +23,6 @@ export default class WritingInboxPlugin extends Plugin {
 			reviewModeField,
 			createReviewExtension(
 				() => this.reviewService.getCurrentReviewFile(),
-				this.writingInbox,
 				(quality) => this.reviewService.handleReview(quality),
 				() => this.reviewService.handleArchive()
 			)
