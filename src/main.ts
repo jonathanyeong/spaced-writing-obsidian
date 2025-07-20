@@ -3,17 +3,31 @@ import type { PluginSettings } from './settings';
 import { Notice, Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, WritingInboxSettingTab } from './settings';
 import { WritingInbox } from './core/writingInbox';
-import { DailyReviewModal } from './ui/dailyReviewModal';
 import { NewEntryModal } from './ui/newEntryModal';
+import { ReviewService } from './services/reviewService';
+import { createReviewExtension, reviewModeField } from './extensions/reviewExtension';
 
 export default class WritingInboxPlugin extends Plugin {
 	settings: PluginSettings;
 	writingInbox: WritingInbox;
+	reviewService: ReviewService;
 
 	async onload() {
 		await this.loadSettings();
 
 		this.writingInbox = new WritingInbox(this.app.vault);
+		this.reviewService = new ReviewService(this.app, this.writingInbox);
+
+		// Register editor extension
+		this.registerEditorExtension([
+			reviewModeField,
+			createReviewExtension(
+				() => this.reviewService.getCurrentReviewFile(),
+				this.writingInbox,
+				(quality) => this.reviewService.handleReview(quality),
+				() => this.reviewService.handleArchive()
+			)
+		]);
 
 		this.addRibbonIcon('book-open', 'Start Daily Review', () => {
 			this.startDailyReview();
@@ -35,6 +49,14 @@ export default class WritingInboxPlugin extends Plugin {
 			}
 		});
 
+		this.addCommand({
+			id: 'stop-daily-review',
+			name: 'Stop Daily Review',
+			callback: () => {
+				this.reviewService.stopReview();
+			}
+		});
+
 		this.addSettingTab(new WritingInboxSettingTab(this.app, this));
 	}
 
@@ -53,8 +75,7 @@ export default class WritingInboxPlugin extends Plugin {
 	private async startDailyReview() {
 		try {
 			await this.ensureFoldersExist();
-			const modal = new DailyReviewModal(this.app, this.writingInbox, this.settings.writingInboxFolder);
-			modal.open();
+			await this.reviewService.startDailyReview(this.settings.writingInboxFolder);
 		} catch (error) {
 			console.error('Error starting daily review:', error);
 			new Notice('Error starting daily review. Please check your settings.');
