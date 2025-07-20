@@ -5,6 +5,8 @@ Use spaced reptition to help you write! Inspired by [Andy Matuschak](https://not
 Create notes and thoughts that are added to a writing inbox. Review these notes daily marking them as fruitful or unfruitful. Fruitful posts you'll see more often and unfruitful ones you'll see less.
 Once you no longer need a post you can archive it so it no longer appears in your review queue.
 
+![Demo of writing inbox - creating a note then starting a daily review, showing how to mark a note as fruitful](./images/writing-inbox-demo.gif)
+
 ## Commands
 **Writing Inbox: Add New Entry**
 Creates a new file under your writing inbox folder. Queues it up for daily review.
