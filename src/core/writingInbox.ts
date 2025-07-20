@@ -1,5 +1,7 @@
 import matter from 'gray-matter';
 import { TFile, TFolder, Vault } from 'obsidian';
+import { format } from 'date-fns';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 import { calculateSM2, getInitialSM2Values } from '../sm2/sm2';
 
 export const QUALITY_MAPPING = {
@@ -36,16 +38,18 @@ export class WritingInbox {
    */
   async createEntry(content: string, folder: string): Promise<void> {
     const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const zonedDate = toZonedTime(now, userTimezone);
+    
+    // Use local date for filename
+    const dateStr = format(zonedDate, 'yyyy-MM-dd');
     const title = content.split('\n')[0].slice(0, 50).replace(/[^a-zA-Z0-9\s]/g, '').trim();
     const filename = `${dateStr}-${title.toLowerCase().replace(/\s+/g, '-')}.md`;
     const filepath = `${folder}/entries/${filename}`;
     const { interval, repetitions, easeFactor } = getInitialSM2Values();
 
-    // Create ID with format: YYYYMMDDHHmmss (UTC time)
-    const dateId = now.toISOString()
-      .replace(/[-:T]/g, '')
-      .slice(0, 14);
+    // Create ID with format: YYYYMMDDHHmmss (local time)
+    const dateId = format(zonedDate, 'yyyyMMddHHmmss');
 
     const frontmatter: EntryFrontmatter = {
       id: dateId,
@@ -95,12 +99,12 @@ export class WritingInbox {
     nextReview.setDate(nextReview.getDate() + sm2Result.interval);
 
     // Update frontmatter
-
+    const now = new Date();
     const frontmatter: EntryFrontmatter = {
       ...entry.frontmatter,
-      lastReviewed: new Date().toISOString(),
+      lastReviewed: now.toISOString(),
       nextReview: nextReview.toISOString(),
-      lastModified: new Date().toISOString(),
+      lastModified: now.toISOString(),
       interval: sm2Result.interval,
       easeFactor: sm2Result.easeFactor,
       repetitions: sm2Result.repetitions,
@@ -131,10 +135,18 @@ export class WritingInbox {
    */
   async getEntriesDueForReview(folder: string): Promise<WritingEntry[]> {
     const activeEntries = await this.getActiveEntries(folder);
-    const today = new Date();
-    today.setHours(23, 59, 59, 999); // End of today
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    
+    // Get end of today in user's timezone
+    const now = new Date();
+    const zonedNow = toZonedTime(now, userTimezone);
+    const endOfToday = new Date(zonedNow);
+    endOfToday.setHours(23, 59, 59, 999);
+    
+    // Convert back to UTC for comparison with stored ISO dates
+    const endOfTodayUTC = fromZonedTime(endOfToday, userTimezone);
 
-    return activeEntries.filter(entry => new Date(entry.frontmatter.nextReview) <= today);
+    return activeEntries.filter(entry => new Date(entry.frontmatter.nextReview) <= endOfTodayUTC);
   }
 
   /**

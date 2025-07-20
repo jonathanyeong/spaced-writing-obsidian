@@ -24,6 +24,8 @@
 		"vitest": "^3.2.4"
 	},
 	"dependencies": {
+		"date-fns": "^4.1.0",
+		"date-fns-tz": "^3.2.0",
 		"gray-matter": "^4.0.3"
 	}
 }

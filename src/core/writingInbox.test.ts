@@ -24,6 +24,7 @@ describe('WritingInbox', () => {
   let mockFiles: Map<string, string>;
 
   beforeEach(() => {
+    vi.stubEnv('TZ', 'UTC');
     mockFiles = new Map();
 
     // Mock Vault
@@ -81,6 +82,7 @@ describe('WritingInbox', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.clearAllMocks();
+    vi.unstubAllEnvs();
   });
 
   describe('createEntry', () => {
