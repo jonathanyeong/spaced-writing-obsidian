@@ -1,6 +1,6 @@
 # Spaced Repetition Writing Inbox
 
-Use spaced reptition to help you write! Inspired by [Andy Matuschak](https://notes.andymatuschak.org/zSK4LyrCbG9zDrdCWmcovUW).
+Use spaced repetition to help you write! Inspired by [Andy Matuschak](https://notes.andymatuschak.org/zSK4LyrCbG9zDrdCWmcovUW).
 
 Create notes and thoughts that are added to a writing inbox. Review these notes daily marking them as fruitful or unfruitful. Fruitful posts you'll see more often and unfruitful ones you'll see less.
 Once you no longer need a post you can archive it so it no longer appears in your review queue.

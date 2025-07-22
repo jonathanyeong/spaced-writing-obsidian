@@ -54,6 +54,31 @@ export class Vault extends EventEmitter {
     trigger(name: string, ...data: unknown[]): void {
         this.emit(name, ...data);
     }
+
+    // Add mock methods needed for tests
+    async create(path: string, content: string): Promise<TFile | null> {
+        throw new Error('Mock not implemented');
+    }
+
+    async read(file: TFile): Promise<string> {
+        throw new Error('Mock not implemented');
+    }
+
+    async modify(file: TFile, content: string): Promise<void> {
+        throw new Error('Mock not implemented');
+    }
+
+    async rename(file: TFile, newPath: string): Promise<void> {
+        throw new Error('Mock not implemented');
+    }
+
+    getFileByPath(path: string): TFile | null {
+        throw new Error('Mock not implemented');
+    }
+
+    getAbstractFileByPath(path: string): TAbstractFile | null {
+        throw new Error('Mock not implemented');
+    }
 }
 
 export class Component {

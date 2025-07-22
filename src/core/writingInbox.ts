@@ -40,7 +40,7 @@ export class WritingInbox {
     const now = new Date();
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const zonedDate = toZonedTime(now, userTimezone);
-    
+
     // Use local date for filename
     const dateStr = format(zonedDate, 'yyyy-MM-dd');
     const title = content.split('\n')[0].slice(0, 50).replace(/[^a-zA-Z0-9\s]/g, '').trim();
@@ -119,13 +119,17 @@ export class WritingInbox {
    * @param file - The file to archive
    */
   async archiveEntry(file: TFile): Promise<void> {
-    const entry = await this.vault.read(file);
-    if (!entry) {
+    try {
+      const entry = await this.vault.read(file);
+      if (!entry) {
+        throw new Error('Entry not found');
+      }
+
+      const newPath = file.path.replace('/entries/', '/archive/');
+      await this.vault.rename(file, newPath);
+    } catch {
       throw new Error('Entry not found');
     }
-
-    const newPath = file.path.replace('/entries/', '/archive/');
-    await this.vault.rename(file, newPath);
   }
 
   /**
@@ -136,13 +140,13 @@ export class WritingInbox {
   async getEntriesDueForReview(folder: string): Promise<WritingEntry[]> {
     const activeEntries = await this.getActiveEntries(folder);
     const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
+
     // Get end of today in user's timezone
     const now = new Date();
     const zonedNow = toZonedTime(now, userTimezone);
     const endOfToday = new Date(zonedNow);
     endOfToday.setHours(23, 59, 59, 999);
-    
+
     // Convert back to UTC for comparison with stored ISO dates
     const endOfTodayUTC = fromZonedTime(endOfToday, userTimezone);
 

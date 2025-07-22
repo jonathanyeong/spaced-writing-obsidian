@@ -30,53 +30,62 @@ describe('WritingInbox', () => {
     vi.stubEnv('TZ', 'UTC');
     mockFiles = new Map();
 
-    // Mock Vault
-    vault = {
-      create: vi.fn(async (path: string, content: string) => {
-        mockFiles.set(path, content);
+    // Create a new Vault instance and mock its methods
+    vault = new Vault();
+
+    vi.spyOn(vault, 'create').mockImplementation(async (path: string, content: string) => {
+      mockFiles.set(path, content);
+      const file = new TFile();
+      file.path = path;
+      return file;
+    });
+
+    vi.spyOn(vault, 'read').mockImplementation(async (file: TFile) => {
+      const content = mockFiles.get(file.path);
+      if (content === undefined) {
+        throw new Error('File not found');
+      }
+      return content;
+    });
+
+    vi.spyOn(vault, 'modify').mockImplementation(async (file: TFile, content: string) => {
+      mockFiles.set(file.path, content);
+    });
+
+    vi.spyOn(vault, 'rename').mockImplementation(async (file: TFile, newPath: string) => {
+      const content = mockFiles.get(file.path);
+      if (content) {
+        mockFiles.delete(file.path);
+        mockFiles.set(newPath, content);
+        file.path = newPath;
+      }
+    });
+
+    vi.spyOn(vault, 'getFileByPath').mockImplementation((path: string) => {
+      if (mockFiles.has(path)) {
         const file = new TFile();
         file.path = path;
         return file;
-      }),
-      read: vi.fn(async (file: TFile) => {
-        return mockFiles.get(file.path) || null;
-      }),
-      modify: vi.fn(async (file: TFile, content: string) => {
-        mockFiles.set(file.path, content);
-      }),
-      rename: vi.fn(async (file: TFile, newPath: string) => {
-        const content = mockFiles.get(file.path);
-        if (content) {
-          mockFiles.delete(file.path);
-          mockFiles.set(newPath, content);
-          file.path = newPath;
-        }
-      }),
-      getFileByPath: vi.fn((path: string) => {
-        if (mockFiles.has(path)) {
-          const file = new TFile();
-          file.path = path;
-          return file;
-        }
-        return null;
-      }),
-      getAbstractFileByPath: vi.fn((path: string) => {
-        if (path.endsWith('/entries')) {
-          const children = Array.from(mockFiles.keys())
-            .filter(p => p.startsWith(path + '/') && p.endsWith('.md'))
-            .map(p => {
-              const file = new TFile();
-              file.path = p;
-              file.extension = 'md';
-              return file;
-            });
-          const tfolder = new TFolder
-          tfolder.children = children
-          return tfolder;
-        }
-        return null;
-      })
-    } as unknown as Vault;
+      }
+      return null;
+    });
+
+    vi.spyOn(vault, 'getAbstractFileByPath').mockImplementation((path: string) => {
+      if (path.endsWith('/entries')) {
+        const children = Array.from(mockFiles.keys())
+          .filter(p => p.startsWith(path + '/') && p.endsWith('.md'))
+          .map(p => {
+            const file = new TFile();
+            file.path = p;
+            file.extension = 'md';
+            return file;
+          });
+        const tfolder = new TFolder();
+        tfolder.children = children;
+        return tfolder;
+      }
+      return null;
+    });
 
     writingInbox = new WritingInbox(vault);
     vi.useFakeTimers();
@@ -171,7 +180,7 @@ describe('WritingInbox', () => {
       vi.setSystemTime(mockDate);
 
       const newContent = 'Updated content';
-      await writingInbox.reviewEntry(mockFile as TFile, newContent, 'fruitful');
+      await writingInbox.reviewEntry(mockFile, newContent, 'fruitful');
 
       expect(vault.modify).toHaveBeenCalledOnce();
       const [file, fileContent] = (vault.modify as Mock).mock.calls[0];
@@ -190,7 +199,7 @@ describe('WritingInbox', () => {
       const mockDate = new Date('2024-01-16T14:00:00.000Z');
       vi.setSystemTime(mockDate);
 
-      await writingInbox.reviewEntry(mockFile as TFile, 'Updated content', 'skip');
+      await writingInbox.reviewEntry(mockFile, 'Updated content', 'skip');
 
       const [, fileContent] = (vault.modify as Mock).mock.calls[0];
       const parsed = matter(fileContent);
@@ -203,8 +212,7 @@ describe('WritingInbox', () => {
       const mockDate = new Date('2024-01-16T14:00:00.000Z');
       vi.setSystemTime(mockDate);
 
-      await writingInbox.reviewEntry(mockFile as TFile, 'Updated content', 'unfruitful');
-
+      await writingInbox.reviewEntry(mockFile, 'Updated content', 'unfruitful');
       const [, fileContent] = (vault.modify as Mock).mock.calls[0];
       const parsed = matter(fileContent);
 
@@ -215,7 +223,7 @@ describe('WritingInbox', () => {
     it('should throw error if entry not found', async () => {
       mockFiles.clear();
 
-      await expect(writingInbox.reviewEntry(mockFile as TFile, 'content', 'skip'))
+      await expect(writingInbox.reviewEntry(mockFile, 'content', 'skip'))
         .rejects.toThrowError('Entry not found');
     });
   });
@@ -226,8 +234,7 @@ describe('WritingInbox', () => {
       mockFile.path = '/writing-inbox/entries/2024-01-15-test.md';
       mockFiles.set(mockFile.path, 'File content');
 
-      await writingInbox.archiveEntry(mockFile as TFile);
-
+      await writingInbox.archiveEntry(mockFile);
       expect(vault.rename).toHaveBeenCalledWith(
         mockFile,
         '/writing-inbox/archive/2024-01-15-test.md'
@@ -237,9 +244,8 @@ describe('WritingInbox', () => {
     it('should throw error if entry not found', async () => {
       const mockFile = new TFile();
       mockFile.path = '/writing-inbox/entries/nonexistent.md';
-      (vault.read as Mock).mockResolvedValueOnce(null);
-
-      await expect(writingInbox.archiveEntry(mockFile as TFile))
+      (vault.read as Mock).mockRejectedValueOnce(new Error('File not found'));
+      await expect(writingInbox.archiveEntry(mockFile))
         .rejects.toThrowError('Entry not found');
     });
   });

@@ -1,5 +1,5 @@
 {
-	"name": "writing-inbox",
+	"name": "spaced-writing-inbox",
 	"version": "0.2.0",
 	"description": "Writing inbox plugin for Obsidian",
 	"main": "main.js",
